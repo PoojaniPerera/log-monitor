@@ -5,7 +5,7 @@ import logging
 import sys
 
 logging.basicConfig(
-    filename='job_monitor.log',
+    filename='job_monitor1.log',
     filemode='a',  # Append to existing log file
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s : %(message)s',
@@ -51,7 +51,6 @@ def parse_logs(logs_line_list):
                                
         try:
             time = datetime.strptime(timestamp, TIME_FORMAT)
-            logging.info("invalid time format")
         except ValueError:
             logging.exception("invalid time format")
             continue
