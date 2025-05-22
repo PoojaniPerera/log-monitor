@@ -1,5 +1,3 @@
-# tests/test_log_parser.py
-
 import unittest
 from log_monitor import parse_logs
 
