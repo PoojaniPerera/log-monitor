@@ -2,6 +2,7 @@ import csv
 from datetime import datetime, timedelta
 from collections import defaultdict
 import logging
+import sys
 
 logging.basicConfig(
     filename='job_monitor.log',
@@ -16,21 +17,43 @@ ERROR_TIME_DELTA = timedelta(minutes=10)
 job_tracking_dict = defaultdict(dict)
 
 def read_logs_file(input_log_file):
-    
-    with open(input_log_file, newline='') as csvfile:
-        log_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
 
-        logs_line_list = [item for item in log_reader]
+    #Read given csv log file and store data to a list
+    try:
+        with open(input_log_file, newline='') as csvfile:
+            log_reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+
+            logs_line_list = [item for item in log_reader]
+            return logs_line_list
            
-    return logs_line_list
+    except FileNotFoundError:
+        logging.exception(f"Log file logs.csv not found.")
+        sys.exit(1)
+    except Exception as e:
+        logging.exception(f"An error occurred while processing the log file: {e}")
+        sys.exit(1)
+    
 
 def parse_logs(logs_line_list):
-    
+    """
+    Parses job logs from a CSV reader and evaluates their durations.
+    Returns a list of warning/error lines for the report.
+    """
+
     results = []
     for row in logs_line_list:
-        timestamp, description, jobstatus , pid = [item.strip() for item in row]    
-                      
-        time = datetime.strptime(timestamp, "%H:%M:%S")
+
+        if len(row) != 4:
+            logging.warning(f"skipping as row contains invalid fields : {row}")
+        else:
+            timestamp, description, jobstatus , pid = [item.strip() for item in row]
+                               
+        try:
+            time = datetime.strptime(timestamp, TIME_FORMAT)
+            logging.info("invalid time format")
+        except ValueError:
+            logging.exception("invalid time format")
+            continue
         line = evaluate_job_duration(time, description, jobstatus , pid)
 
         if line is not None:
@@ -38,6 +61,10 @@ def parse_logs(logs_line_list):
     return results
 
 def evaluate_job_duration(time, description, jobstatus , pid):
+    """
+    Tracks START/END jobs and logs warnings/errors if thresholds are breached.
+    Returns a report line if the job exceeds warning or error thresholds.
+    """
 
     line = None
 
@@ -68,11 +95,17 @@ def evaluate_job_duration(time, description, jobstatus , pid):
 
 
 def generate_report(results, output_path='report.txt'):
+    """
+    Writes the list of report lines to the given file path and generate report with WARNING and Error messages
+    """
 
-    with open(output_path, 'w') as f:
-        for line in results:
-            f.write(line + '\n')
-
+    try:
+        with open(output_path, 'w') as f:
+            for line in results:
+                f.write(line + '\n')
+    except Exception as e:
+        logging.exception(f"An error occurred while generating the report: {e}")
+        sys.exit(1)
 
 def main():
     input_log_file = "logs.log"
