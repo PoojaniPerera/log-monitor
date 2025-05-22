@@ -1,5 +1,5 @@
 # log-monitor
-A python based app to monitor job duration from log files and print alerts
+A python based script to monitor job duration from log files and generate report containing warning and error alerts
 
 ## Description
 
@@ -12,7 +12,13 @@ This application parses a log file containing job start and end events, calculat
 - Logs a:
   - **Warning** if a job exceeds 5 minutes
   - **Error** if a job exceeds 10 minutes
-- Outputs both to `job_monitor.log` and a summary `report_<timestamp>.txt`
+- Outputs both to `job_monitor.log` and a report `report_<timestamp>.txt`
+
+### Log Structure:
+- HH:MM:SS is a timestamp in hours, minutes, and seconds.
+- The job description.
+- Each log entry is either the “START” or “END” of a process.
+- Each job has a PID associated with it e.g., 46578.
 
 ## Usage
 
