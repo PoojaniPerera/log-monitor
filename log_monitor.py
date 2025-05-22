@@ -12,6 +12,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H: %M: %S",
 )
 
+TIME_FORMAT = "%H:%M:%S"
 WARNING_TIME_DELTA = timedelta(minutes=5)
 ERROR_TIME_DELTA = timedelta(minutes=10)
 job_tracking_dict = defaultdict(dict)
@@ -55,7 +56,6 @@ def parse_logs(logs_line_list):
             logging.exception("invalid time format")
             continue
         line = evaluate_job_duration(time, description, jobstatus , pid)
-
         if line is not None:
             results.append(line)
     return results
@@ -90,17 +90,20 @@ def evaluate_job_duration(time, description, jobstatus , pid):
                 logging.info(f"no start job found for job {description} PID - {pid}")
         
     else:
-        logging.error(f"invalid job status!")    
+        logging.error(f"invalid job status!")   
+
     return line  
 
 
-def generate_report(results, output_path='report.txt'):
+def generate_report(results):
     """
     Writes the list of report lines to the given file path and generate report with WARNING and Error messages
     """
 
+    current_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    report_filename = f"report_{current_timestamp}.txt"
     try:
-        with open(output_path, 'w') as f:
+        with open(report_filename, 'w') as f:
             for line in results:
                 f.write(line + '\n')
     except Exception as e:
@@ -110,7 +113,7 @@ def generate_report(results, output_path='report.txt'):
 def main():
     input_log_file = "logs.log"
     logs_line_list = read_logs_file(input_log_file)
-    warning_error_list = parse_logs(logs_line_list)
+    warning_error_list = parse_logs(logs_line_list)    
     generate_report(warning_error_list)
     
 if __name__ == '__main__':
