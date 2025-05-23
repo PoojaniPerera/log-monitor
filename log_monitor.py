@@ -5,7 +5,7 @@ import logging
 import sys
 
 logging.basicConfig(
-    filename='job_monitor1.log',
+    filename='outputs/job_monitor1.log',
     filemode='a',  # Append to existing log file
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s : %(message)s',
@@ -103,8 +103,9 @@ def generate_report(results):
 
     current_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     report_filename = f"report_{current_timestamp}.txt"
+    report_path = f"outputs/{report_filename}"
     try:
-        with open(report_filename, 'w') as f:
+        with open(report_path, 'w') as f:
             for line in results:
                 f.write(line + '\n')
     except Exception as e:
